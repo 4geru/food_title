@@ -3,14 +3,24 @@ require 'json'
 
 class ScrapingPage
   def initialize(url)
-    @agent = Mechanize.new
+    agent = Mechanize.new
+    @page = agent.get(url)
     @url = url
   end
 
   def get_titles
-    agent = Mechanize.new
-    page = agent.get(@url)
-    page.css('h3.main-tit')[0].text
+    @page.css('h3.main-tit')[0].text
+  end
+
+  def get_details
+    str = @page.css('div.medium-7')[0].text
+    str = str.split('】')[1]
+
+    str.split('　').map{ |item| 
+      title = item.gsub(/[● ]/,'').split(/[0-9]/)[0]
+      content = item.split(/[^0-9^\.]/)[-1]
+      ["#{title}", content]
+    }.to_h
   end
 end
 
